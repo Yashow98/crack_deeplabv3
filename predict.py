@@ -1,6 +1,6 @@
+import argparse
 import os
 import time
-import json
 
 import torch
 from torchvision import transforms
@@ -15,20 +15,13 @@ def time_synchronized():
     return time.time()
 
 
-def main():
+def main(args):
     aux = False  # inference time not need aux_classifier
-    classes = 20
-    weights_path = "./save_weights/model_29.pth"
-    img_path = "./test.jpg"
-    palette_path = "./palette.json"
+    classes = 1
+    weights_path = "./save_weights/best_model.pth"
+    img_path = args.test_path
     assert os.path.exists(weights_path), f"weights {weights_path} not found."
     assert os.path.exists(img_path), f"image {img_path} not found."
-    assert os.path.exists(palette_path), f"palette {palette_path} not found."
-    with open(palette_path, "rb") as f:
-        pallette_dict = json.load(f)
-        pallette = []
-        for v in pallette_dict.values():
-            pallette += v
 
     # get devices
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -73,10 +66,22 @@ def main():
 
         prediction = output['out'].argmax(1).squeeze(0)
         prediction = prediction.to("cpu").numpy().astype(np.uint8)
+        # 将前景对应的像素值改成255(白色)
+        prediction[prediction == 1] = 255
+        # 将不敢兴趣的区域像素设置成0(黑色)
+        prediction[prediction == 0] = 0
         mask = Image.fromarray(prediction)
-        mask.putpalette(pallette)
         mask.save("test_result.png")
 
 
+def parse_args():
+    parser = argparse.ArgumentParser(description="pytorch unet predicting")
+    # parser.add_argument('--model-flag', default='unet', type=str, help='model class flag')
+    parser.add_argument('--test-path', default='./DRIVE/test/images/007.jpg', type=str, help='test image path')
+
+    return parser.parse_args()
+
+
 if __name__ == '__main__':
-    main()
+    args = parse_args()
+    main(args)
