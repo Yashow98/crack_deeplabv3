@@ -153,6 +153,7 @@ def main(args):
         val_info = str(confmat)
         print(val_info)
         mIou = val_info.split(':')[-1].strip()
+        mIou = float(mIou)
         # write into txt
         with open(results_file, "a") as f:
             # 记录每个epoch对应的train_loss、lr以及验证集各指标
@@ -190,9 +191,9 @@ def parse_args():
     parser.add_argument("--num-classes", default=1, type=int)
     parser.add_argument("--aux", default=False, type=bool, help="auxilier loss")
     parser.add_argument("--device", default="cuda", help="training device")
-    parser.add_argument("-b", "--batch-size", default=2, type=int)
+    parser.add_argument("-b", "--batch-size", default=6, type=int)
     parser.add_argument("--epochs", default=10, type=int, metavar="N", help="number of total epochs to train")
-    parser.add_argument('--lr', default=0.0001, type=float, help='initial learning rate')
+    parser.add_argument('--lr', default=0.001, type=float, help='initial learning rate')
     parser.add_argument('--enable-pretrained', default=False, type=bool)
     parser.add_argument('--momentum', default=0.9, type=float, metavar='M', help='momentum')
     parser.add_argument('--wd', '--weight-decay', default=1e-4, type=float,
